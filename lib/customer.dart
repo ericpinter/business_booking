@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerWidget extends StatefulWidget {
-  CustomerWidget({Key key}) : super(key: key);
+  final SharedPreferences sharedPreferences;
+  CustomerWidget(this.sharedPreferences,{Key key}) : super(key: key);
 
   @override
   _CustomerWidgetState createState() => _CustomerWidgetState();
@@ -15,7 +17,11 @@ class _CustomerWidgetState extends State<CustomerWidget> {
   Widget build(BuildContext context) {
     var tabs = ["White"];
 
-    return DefaultTabController(
+    return Theme(
+        data: ThemeData(
+          primarySwatch: Colors.blue
+        ),
+        child: DefaultTabController(
       length: tabs.length,
       child: Scaffold(
         appBar: AppBar(
@@ -47,6 +53,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
           ],
         ),
       ),
+    )
     );
   }
 }
