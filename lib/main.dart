@@ -1,8 +1,9 @@
+import 'package:business_booking/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'customer.dart';
-import 'shop.dart';
+import 'package:business_booking/customer.dart';
+import 'package:business_booking/shop.dart';
 
 
 void main() async {
@@ -10,14 +11,12 @@ void main() async {
   final sharedPreferences =
       await SharedPreferences.getInstance();
 
-  runApp(MyApp(sharedPreferences));
+  ShopState(sharedPreferences);
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final SharedPreferences sharedPreferences;
-  // This widget is the root of your application.
-
-  MyApp(this.sharedPreferences);
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +27,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: ShopOrCustomerWidget(this.sharedPreferences),
+      home: ShopOrCustomerWidget(),
     );
   }
 }
 
 class ShopOrCustomerWidget extends StatelessWidget {
-  final SharedPreferences sharedPreferences;
-  ShopOrCustomerWidget(this.sharedPreferences);
   void redirectTo(context, Widget w) {
     Navigator.push(
       context,
@@ -57,12 +54,12 @@ class ShopOrCustomerWidget extends StatelessWidget {
               RaisedButton(
                   child: Text("Business Owner"),
                   onPressed: () {
-                    redirectTo(context, ShopWidget(this.sharedPreferences));
+                    redirectTo(context, ShopWidget());
                   }),
               RaisedButton(
                   child: Text("Customer"),
                   onPressed: () {
-                    redirectTo(context, CustomerWidget(this.sharedPreferences));
+                    redirectTo(context, CustomerWidget());
                   })
             ],
           ),

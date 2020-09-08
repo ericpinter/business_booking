@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 class CustomerWidget extends StatefulWidget {
-  final SharedPreferences sharedPreferences;
-  CustomerWidget(this.sharedPreferences,{Key key}) : super(key: key);
+  CustomerWidget({Key key}) : super(key: key);
 
   @override
   _CustomerWidgetState createState() => _CustomerWidgetState();
@@ -15,7 +12,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var tabs = ["White"];
+    var tabs = ["Booking"];
 
     return Theme(
         data: ThemeData(
@@ -41,11 +38,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'You have pushed the button this many times:',
-                    ),
-                    Text(
-                      '$_counter',
-                      style: Theme.of(context).textTheme.headline4,
+                      'This will eventually be where the user can see the open time-slots',
                     ),
                   ],
                 ),

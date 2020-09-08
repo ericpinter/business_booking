@@ -1,23 +1,17 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:business_booking/storage.dart';
 
 class ShopWidget extends StatelessWidget {
-  final SharedPreferences sharedPreferences;
-  ShopWidget(this.sharedPreferences);
   @override
   Widget build(BuildContext context) {
     var tabs = ["Products", "Calendar"];
-    var tabWidgets = [ProductWidget(this.sharedPreferences), CalendarWidget(this.sharedPreferences)];
+    var tabWidgets = [ProductWidget(), CalendarWidget()];
 
     return Theme(
         data: ThemeData(
-          primaryColor: Colors.green[900],
-          colorScheme: ColorScheme.dark(
-              secondary: Colors.amberAccent,
-              surface: Colors.amber
-          ),
+          primarySwatch: Colors.green,
+          accentColor: Colors.orange[300],
         ),
         child: DefaultTabController(
 
@@ -42,58 +36,34 @@ class ShopWidget extends StatelessWidget {
 }
 
 class ProductWidget extends StatefulWidget {
-  final SharedPreferences sharedPreferences;
-  ProductWidget(this.sharedPreferences);
   @override
   State<StatefulWidget> createState() => _ProductState();
 }
 
 class _ProductState extends State<ProductWidget> {
-  List<Product> products = [];
 
-  void addProduct(Product p) {
-    products.add(p);
-    this.setState(() {});//reload
-    widget.sharedPreferences.setString("products", json.encode(products));
+  void reload() {
+    this.setState(() {});
   }
 
   Future<void> promptAddProduct() async {
     await showDialog(
       context: context,
-      builder: (_) =>
-          AlertDialog(
-            title: Text("Add a new product"),
-            content: ProductForm(
-
-            ),
-          ),
+      builder: (_) => AddProductDialog(),
       barrierDismissible: true,
-    ).then((product) => addProduct(product));
+    ).then((product) => {if (product != null) ShopState.state.saveNewProduct(product)});
+    reload();
   }
 
 
   @override
   Widget build(BuildContext context) {
-    var productString = widget.sharedPreferences.getString("products");
-    print(productString);
-    var l = (json.decode(productString) as List ?? []);
-    products = [];
-    for (Map data in l) {
-      if (data != null && data.isNotEmpty) {
-        print(data.entries);
-        products.add(Product.fromJson(data));
-      }
-    }
-    for (final product in products) {
-      print(product.name + " " + product.price.toString() + " " + product.timeToComplete.toString());
-    }
-
 
     return Scaffold(
         body: ListView(
           scrollDirection: Axis.vertical,
           children: [
-            for (final product in products)
+            for (final product in ShopState.products)
               Card(
                 child: Column(children: <Widget>[
                   Text(product.name),
@@ -110,113 +80,101 @@ class _ProductState extends State<ProductWidget> {
   }
 }
 
-class ProductForm extends StatefulWidget {
-  ProductForm({Key key}) : super(key: key);
+class AddProductDialog extends StatefulWidget {
+  AddProductDialog({Key key}) : super(key: key);
 
   @override
-  _ProductFormState createState() => _ProductFormState();
+  _AddProductDialogState createState() => _AddProductDialogState();
 }
 
-class _ProductFormState extends State<ProductForm> {
+class _AddProductDialogState extends State<AddProductDialog> {
   final _formKey = GlobalKey<FormState>();
   Product addedProduct = Product();
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
 
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Product Name',
-            ),
-            onSaved: (name) {
-              addedProduct.name = name;
-            },
-            validator: (value) {
-              if (value.isEmpty) {
-                return 'Please enter some text';
-              }
-              return null;
-            },
+
+    return AlertDialog(
+        title: Text("Add a new product"),
+        content: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+
+            children: <Widget>[
+
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Product Name',
+                ),
+                onSaved: (name) {
+                  addedProduct.name = name;
+                },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter some text';
+                  }
+                  return null;
+                },
+              ),
+
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Product Price',
+                ),
+                keyboardType: TextInputType.number,
+                onSaved: (price) {
+                  addedProduct.price = double.parse(price);
+                },
+                validator: (value) {
+                  if (value.isEmpty || !(double.parse(value) is double)) {
+                    return 'Please enter a number';
+                  }
+                  return null;
+                },
+              ),
+
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Appointment Length',
+                ),
+                keyboardType: TextInputType.number,
+                onSaved: (time) {
+                  addedProduct.timeToComplete = int.parse(time);
+                },
+                validator: (value) {
+                  if (value.isEmpty || !(int.parse(value) is int)) {
+                    return 'Please enter the length in minutes';
+                  }
+                  return null;
+                },
+              ),
+
+
+
+            ],
+
           ),
 
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Product Price',
-            ),
-            keyboardType: TextInputType.number,
-            onSaved: (price) {
-              addedProduct.price = double.parse(price);
-            },
-            validator: (value) {
-              if (!(double.parse(value) is double)) {
-                return 'Please enter a number';
-              }
-              return null;
-            },
-          ),
-
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Appointment Length',
-            ),
-            keyboardType: TextInputType.number,
-            onSaved: (time) {
-              addedProduct.timeToComplete = int.parse(time);
-            },
-            validator: (value) {
-              if (!(int.parse(value) is int)) {
-                return 'Please enter the number of minutes the appointment will need';
-              }
-              return null;
-            },
-          ),
-
-
-          RaisedButton(onPressed: () {
-            if (_formKey.currentState.validate()) {
-              _formKey.currentState.save();
-              Navigator.pop(context, addedProduct);
-            }
-          },
-            child: Text("Submit"),
-          )
-
-        ],
-
-      ),
+        ),
+        actions:
+        [RaisedButton(onPressed: () {
+          if (_formKey.currentState.validate()) {
+            _formKey.currentState.save();
+            Navigator.pop(context, addedProduct);
+          }
+        },
+          child: Text("Submit"),
+        )]
     );
   }
 }
 
 
-class Product {
-  String name;
-  double price;
-  int timeToComplete;
-
-  Product({this.name, this.price, this.timeToComplete});
-
-  Product.fromJson(Map<String, dynamic> json)
-      : name = json['name'],
-        price = json['price'],
-        timeToComplete = json['timeToComplete'];
-
-  Map<String, dynamic> toJson() =>
-      {
-        'name': name,
-        'price': price,
-        'timeToComplete': timeToComplete
-      };
-}
 
 class CalendarWidget extends StatefulWidget {
-  final SharedPreferences sharedPreferences;
-  CalendarWidget(this.sharedPreferences);
   @override
   State<StatefulWidget> createState() => CalendarState();
 }
@@ -224,6 +182,6 @@ class CalendarWidget extends StatefulWidget {
 class CalendarState extends State<CalendarWidget> {
   @override
   Widget build(BuildContext context) {
-    return Text("hi");
+    return Text("This is where the shop owners will be able to define specific times for appointments");
   }
 }
