@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:business_booking/storage.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 class ShopWidget extends StatelessWidget {
   @override
@@ -58,7 +59,6 @@ class _ProductState extends State<ProductWidget> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         body: ListView(
           scrollDirection: Axis.vertical,
@@ -93,8 +93,6 @@ class _AddProductDialogState extends State<AddProductDialog> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return AlertDialog(
         title: Text("Add a new product"),
         content: Form(
@@ -153,7 +151,6 @@ class _AddProductDialogState extends State<AddProductDialog> {
               ),
 
 
-
             ],
 
           ),
@@ -167,11 +164,11 @@ class _AddProductDialogState extends State<AddProductDialog> {
           }
         },
           child: Text("Submit"),
-        )]
+        )
+        ]
     );
   }
 }
-
 
 
 class CalendarWidget extends StatefulWidget {
@@ -180,8 +177,50 @@ class CalendarWidget extends StatefulWidget {
 }
 
 class CalendarState extends State<CalendarWidget> {
+  void reload() {
+    this.setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Text("This is where the shop owners will be able to define specific times for appointments");
+    return Scaffold(
+        body: ListView(
+          scrollDirection: Axis.vertical,
+          children: [
+            Text("Booked Appointments"),
+            for (final appointment in ShopState.bookedAppointments)
+              Card(
+                child: Column(children: <Widget>[
+                  Text(appointment.toString()),
+                ]),
+              ),
+            Text("Open Appointment Times"),
+            for (final timeRange in ShopState.openAppointments)
+              Card(
+                child: Column(children: <Widget>[
+                  Text(timeRange.toString())
+                ]),
+              ),
+
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => {
+            DatePicker.showDateTimePicker(context,
+                showTitleActions: true,
+                minTime: DateTime(2018, 3, 5),
+                maxTime: DateTime(2021, 1, 1),
+                onChanged: (_) {},
+                onConfirm: (dateTime) {
+                  print(dateTime.toString());
+                  ShopState.state.saveNewOpenAppointment(dateTime);
+                  reload();
+                },
+                currentTime: DateTime.now(),
+                locale: LocaleType.en
+            )
+          },
+          child: Icon(Icons.add),
+        ));
   }
 }

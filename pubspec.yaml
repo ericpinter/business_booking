@@ -24,6 +24,8 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: any
+  flutter_datetime_picker: any
+  json_annotation : any
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -33,6 +35,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  json_serializable: any
+  build_runner : any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
