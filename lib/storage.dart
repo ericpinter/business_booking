@@ -95,6 +95,7 @@ class ShopState {
 
   void saveBookingFor(Appointment a) {
     print("remove successful ${_openAppointments.remove(a.start)}");
+    saveOpenAppointments();
     _bookedAppointments.add(a);
     sharedPreferences.setString(bookedAppointmentsString, json.encode(_bookedAppointments));
   }
